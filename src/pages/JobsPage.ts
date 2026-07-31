@@ -32,6 +32,12 @@ export class JobsPage extends BasePage {
   private signUpButton: Locator;
   private confirmationMessage: Locator;
 
+  // Locators for sorting
+  private sortDropdown: Locator;
+  private jobListItems: Locator;
+  private nextPageButton: Locator;
+  private paginationInfo: Locator;
+
   constructor(page: Page) {
     super(page);
 
@@ -65,6 +71,12 @@ export class JobsPage extends BasePage {
     this.signUpButton = page.getByRole('button', { name: 'Submit Job Alerts' });
     // Confirmation is a plain paragraph with this exact success text (not an ARIA live region)
     this.confirmationMessage = page.getByText('Your subscription was submitted successfully');
+
+    // Initialize sorting locators
+    this.sortDropdown = page.getByRole('combobox', { name: /sort|order/i }).first();
+    this.jobListItems = page.locator('a').filter({ hasText: /Manager|Designer|Developer|Accountant|Customer/ });
+    this.nextPageButton = page.getByRole('link', { name: 'Next' }).or(page.locator('[aria-label*="next" i]'));
+    this.paginationInfo = page.locator('text=/page|of|results/i').first();
   }
 
   /**
@@ -439,5 +451,210 @@ export class JobsPage extends BasePage {
   async getConfirmationMessage(): Promise<string> {
     const text = await this.confirmationMessage.textContent();
     return text || '';
+  }
+
+  /**
+   * Get available sort options from the dropdown
+   * @returns Array of sort option labels
+   */
+  async getSortOptions(): Promise<string[]> {
+    try {
+      // First try to find any sort-related select/combobox
+      const sortDropdowns = await this.page.locator('select, [role="combobox"]').all();
+      
+      for (const dropdown of sortDropdowns) {
+        const label = await dropdown.getAttribute('aria-label');
+        const name = await dropdown.getAttribute('name');
+        
+        // Check if this looks like a sort control
+        if ((label && label.toLowerCase().includes('sort')) || 
+            (name && name.toLowerCase().includes('sort'))) {
+          
+          // Get options if it's a select
+          const options = await dropdown.locator('option').all();
+          if (options.length > 0) {
+            const sortOptions: string[] = [];
+            for (const option of options) {
+              const text = await option.textContent();
+              if (text && text.trim()) {
+                sortOptions.push(text.trim());
+              }
+            }
+            return sortOptions;
+          }
+        }
+      }
+      
+      // Alternative: look for sort buttons or links
+      const sortButtons = await this.page.locator('button, a').filter({ 
+        hasText: /sort|order|newest|relevance/i 
+      }).all();
+      
+      const buttonLabels: string[] = [];
+      for (const button of sortButtons.slice(0, 5)) {
+        const text = await button.textContent();
+        if (text && text.trim()) {
+          buttonLabels.push(text.trim());
+        }
+      }
+      
+      return buttonLabels;
+    } catch (error) {
+      console.log('Unable to find sort options:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Select a sort option from the dropdown
+   * @param sortOption Sort option to select (e.g., "Newest", "Relevance")
+   */
+  async selectSortOption(sortOption: string): Promise<void> {
+    try {
+      // Try to find sort select/combobox
+      const sortDropdowns = await this.page.locator('select, [role="combobox"]').all();
+      let found = false;
+      
+      for (const dropdown of sortDropdowns) {
+        const label = await dropdown.getAttribute('aria-label');
+        const name = await dropdown.getAttribute('name');
+        
+        if ((label && label.toLowerCase().includes('sort')) || 
+            (name && name.toLowerCase().includes('sort'))) {
+          
+          const options = await dropdown.locator('option').all();
+          for (const option of options) {
+            const text = await option.textContent();
+            if (text && text.includes(sortOption)) {
+              const value = await option.getAttribute('value');
+              await dropdown.selectOption(value || '');
+              found = true;
+              break;
+            }
+          }
+          
+          if (found) break;
+        }
+      }
+      
+      if (!found) {
+        // Try to find and click a sort button
+        const sortButton = this.page.locator('button, a').filter({ 
+          hasText: new RegExp(sortOption, 'i') 
+        }).first();
+        
+        await sortButton.waitFor({ timeout: 3000 });
+        await sortButton.click();
+      }
+      
+      // Wait for results to update
+      await this.page.waitForLoadState('domcontentloaded');
+      await this.page.waitForTimeout(500);
+    } catch (error) {
+      console.error('Sort option selection failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all job titles currently displayed on the page
+   * @returns Array of job title strings
+   */
+  async getAllJobTitles(): Promise<string[]> {
+    await this.jobListItems.first().waitFor({ timeout: 5000 });
+    const items = await this.jobListItems.all();
+    const titles: string[] = [];
+    
+    for (const item of items) {
+      const text = await item.textContent();
+      if (text) {
+        titles.push(text.trim());
+      }
+    }
+    
+    return titles;
+  }
+
+  /**
+   * Check if pagination exists on the page
+   * @returns true if pagination controls are present
+   */
+  async hasPagination(): Promise<boolean> {
+    try {
+      // Quick check for next button (short timeout to avoid hanging)
+      const nextButton = this.page.locator(
+        'a[rel="next"], button:has-text("Next"), a:has-text("Next"), [aria-label*="next" i]'
+      ).first();
+      
+      const isVisible = await nextButton.isVisible({ timeout: 1000 }).catch(() => false);
+      return isVisible;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get pagination information (e.g., "Page 1 of 5")
+   * @returns Pagination text
+   */
+  async getPaginationInfo(): Promise<string> {
+    try {
+      // Quick check for pagination text (short timeout)
+      const paginationElements = await this.page.locator(
+        'nav, [aria-label*="pagination" i], .pagination'
+      ).all();
+      
+      if (paginationElements.length > 0) {
+        const text = await paginationElements[0].textContent({ timeout: 1000 });
+        if (text && /page|of|results|\d+/i.test(text)) {
+          if (!text.toLowerCase().includes('cookie') && !text.toLowerCase().includes('consent')) {
+            return text.trim().substring(0, 100);
+          }
+        }
+      }
+      
+      return '';
+    } catch {
+      return '';
+    }
+  }
+
+  /**
+   * Click next page button if available
+   * @returns true if successful, false if next page not available
+   */
+  async clickNextPage(): Promise<boolean> {
+    try {
+      const nextButton = this.page.locator(
+        'a[rel="next"], button:has-text("Next"), a:has-text("Next"), [aria-label*="next" i]'
+      ).first();
+      
+      const isVisible = await nextButton.isVisible({ timeout: 1000 }).catch(() => false);
+      const isDisabled = await nextButton.isDisabled().catch(() => true);
+      
+      if (!isVisible || isDisabled) {
+        return false;
+      }
+      
+      await nextButton.click({ timeout: 5000 });
+      await this.page.waitForLoadState('domcontentloaded');
+      await this.page.waitForTimeout(300);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get the total number of job results displayed on current page
+   * @returns Number of job items
+   */
+  async getJobCount(): Promise<number> {
+    try {
+      const items = await this.jobListItems.all();
+      return items.length;
+    } catch {
+      return 0;
+    }
   }
 }
