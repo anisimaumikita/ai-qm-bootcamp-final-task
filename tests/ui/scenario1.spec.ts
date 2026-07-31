@@ -1,5 +1,5 @@
 import { test, expect } from '../../src/fixtures/testFixtures';
-import { JOBS_SEARCH_PARAMS } from '../../src/utils/testData';
+import { JOBS_SEARCH_PARAMS } from '../../src/constants/testData';
 
 test.describe('Scenario 1: Search for a Job', () => {
   test('should search for jobs and save the first result', async ({

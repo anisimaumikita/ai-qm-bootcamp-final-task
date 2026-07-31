@@ -370,7 +370,26 @@ export class JobsPage extends BasePage {
    */
   async clickAddJobAlert(): Promise<void> {
     await this.addJobAlertButton.waitFor();
-    await this.addJobAlertButton.click();
+    
+    // Dismiss blocking dialogs before clicking
+    await this.dismissSystemAlerts();
+    await this.page.waitForTimeout(200);
+    
+    // Click with retry logic
+    let clickSuccess = false;
+    let attempts = 0;
+    while (!clickSuccess && attempts < 3) {
+      try {
+        await this.addJobAlertButton.click({ timeout: 5000 });
+        clickSuccess = true;
+      } catch (error) {
+        attempts++;
+        if (attempts >= 3) throw error;
+        await this.dismissSystemAlerts();
+        await this.page.waitForTimeout(300);
+      }
+    }
+    
     await this.page.waitForTimeout(300);
   }
 
@@ -379,7 +398,26 @@ export class JobsPage extends BasePage {
    */
   async clickSignUp(): Promise<void> {
     await this.signUpButton.waitFor();
-    await this.signUpButton.click();
+    
+    // Dismiss blocking dialogs before clicking
+    await this.dismissSystemAlerts();
+    await this.page.waitForTimeout(200);
+    
+    // Click with retry logic
+    let clickSuccess = false;
+    let attempts = 0;
+    while (!clickSuccess && attempts < 3) {
+      try {
+        await this.signUpButton.click({ timeout: 5000 });
+        clickSuccess = true;
+      } catch (error) {
+        attempts++;
+        if (attempts >= 3) throw error;
+        await this.dismissSystemAlerts();
+        await this.page.waitForTimeout(300);
+      }
+    }
+    
     await this.page.waitForLoadState('domcontentloaded');
   }
 
