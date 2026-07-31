@@ -1,0 +1,26 @@
+{
+  "name": "ai-qm-bootcamp-final-task",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anisimaumikita/ai-qm-bootcamp-final-task.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/anisimaumikita/ai-qm-bootcamp-final-task/issues"
+  },
+  "homepage": "https://github.com/anisimaumikita/ai-qm-bootcamp-final-task#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@types/node": "^26.1.2",
+    "eslint": "^10.8.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.9.6"
+  }
+}
