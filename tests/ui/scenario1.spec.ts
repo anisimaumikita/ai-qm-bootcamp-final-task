@@ -51,10 +51,12 @@ test.describe('Scenario 1: Search for a Job', () => {
     // Step 9a: Navigate back to jobs page
     await jobsPage.goBack();
 
-    // Step 10: Verify saved jobs count (may be 0 if session doesn't persist)
+    // Step 9b: Wait for page to fully load and count to update
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Step 10: Verify saved jobs count equals 1
     const savedCount = await jobsPage.getSavedJobsCount();
-    // Just verify the count is a number, don't strictly require 1
-    expect(typeof savedCount).toBe('number');
+    expect(savedCount).toBe(1);
 
     // Step 11: Click on Saved Jobs tab
     await jobsPage.clickSavedJobsTab();
