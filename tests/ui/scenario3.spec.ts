@@ -99,4 +99,6 @@ test.describe('Scenario 3: Sort Job Listings', () => {
 
 // My comments on the AI generated test:
 // A lot of console.log(); I have no idea how often this is used in real tests, but I guess it can be useful for debugging. I red that logger class is better than console.log() for real tests, but I guess this is fine for now.
-//
+// A lot of expects for steps that are not really required for the test, but I guess it is good to have them to verify that the steps are working as expected.
+// In overall looks good for generated scenario. First attempts was not successfull, but AI fixed it and now all works good.
+// Good reusability, POM structure is good, locators are good, code is readable and understandable.
