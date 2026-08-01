@@ -277,7 +277,7 @@ export class JobsPage extends BasePage {
   async getFirstJobTitle(): Promise<string> {
     await this.jobTitle.waitFor();
     const text = await this.jobTitle.textContent();
-    return text || '';
+    return text ?? '';
   }
 
   /**
@@ -320,7 +320,7 @@ export class JobsPage extends BasePage {
   async getSavedJobTitle(): Promise<string> {
     await this.jobTitle.waitFor();
     const text = await this.jobTitle.textContent();
-    return text || '';
+    return text ?? '';
   }
 
   /**
@@ -356,7 +356,7 @@ export class JobsPage extends BasePage {
       const text = await option.textContent();
       if (text?.includes(category)) {
         const value = await option.getAttribute('value');
-        await this.categorySelect.selectByValue(value || '');
+        await this.categorySelect.selectByValue(value ?? '');
         found = true;
         break;
       }
@@ -466,7 +466,7 @@ export class JobsPage extends BasePage {
    */
   async getConfirmationMessage(): Promise<string> {
     const text = await this.confirmationMessage.textContent();
-    return text || '';
+    return text ?? '';
   }
 
   /**
@@ -517,7 +517,7 @@ export class JobsPage extends BasePage {
 
       return buttonLabels;
     } catch (error) {
-      console.log('Unable to find sort options:', error);
+      console.warn('Unable to find sort options:', error);
       return [];
     }
   }
@@ -542,7 +542,7 @@ export class JobsPage extends BasePage {
             const text = await option.textContent();
             if (text?.includes(sortOption)) {
               const value = await option.getAttribute('value');
-              await dropdown.selectOption(value || '');
+              await dropdown.selectOption(value ?? '');
               found = true;
               break;
             }

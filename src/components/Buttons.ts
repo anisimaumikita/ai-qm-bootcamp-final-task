@@ -8,7 +8,7 @@ export class Button {
   }
 
   async getText(): Promise<string> {
-    return (await this.locator.textContent()) || '';
+    return (await this.locator.textContent()) ?? '';
   }
 
   async waitFor(options?: { timeout?: number }): Promise<void> {

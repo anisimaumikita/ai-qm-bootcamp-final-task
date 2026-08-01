@@ -31,7 +31,7 @@ export class JobDetailsPage extends BasePage {
   async getJobTitle(): Promise<string> {
     await this.jobDetailTitle.waitFor();
     const text = await this.jobDetailTitle.textContent();
-    return text || '';
+    return text ?? '';
   }
 
   /**
@@ -66,7 +66,7 @@ export class JobDetailsPage extends BasePage {
     try {
       await this.jobDescription.waitFor({ timeout: 3000 });
       const text = await this.jobDescription.textContent();
-      return text || '';
+      return text ?? '';
     } catch {
       return '';
     }
