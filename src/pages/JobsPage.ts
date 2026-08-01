@@ -354,7 +354,7 @@ export class JobsPage extends BasePage {
 
     for (const option of options) {
       const text = await option.textContent();
-      if (text && text.includes(category)) {
+      if (text?.includes(category)) {
         const value = await option.getAttribute('value');
         await this.categorySelect.selectByValue(value || '');
         found = true;
@@ -483,17 +483,14 @@ export class JobsPage extends BasePage {
         const name = await dropdown.getAttribute('name');
 
         // Check if this looks like a sort control
-        if (
-          (label && label.toLowerCase().includes('sort')) ||
-          (name && name.toLowerCase().includes('sort'))
-        ) {
+        if (label?.toLowerCase().includes('sort') || name?.toLowerCase().includes('sort')) {
           // Get options if it's a select
           const options = await dropdown.locator('option').all();
           if (options.length > 0) {
             const sortOptions: string[] = [];
             for (const option of options) {
               const text = await option.textContent();
-              if (text && text.trim()) {
+              if (text?.trim()) {
                 sortOptions.push(text.trim());
               }
             }
@@ -513,7 +510,7 @@ export class JobsPage extends BasePage {
       const buttonLabels: string[] = [];
       for (const button of sortButtons.slice(0, 5)) {
         const text = await button.textContent();
-        if (text && text.trim()) {
+        if (text?.trim()) {
           buttonLabels.push(text.trim());
         }
       }
@@ -539,14 +536,11 @@ export class JobsPage extends BasePage {
         const label = await dropdown.getAttribute('aria-label');
         const name = await dropdown.getAttribute('name');
 
-        if (
-          (label && label.toLowerCase().includes('sort')) ||
-          (name && name.toLowerCase().includes('sort'))
-        ) {
+        if (label?.toLowerCase().includes('sort') || name?.toLowerCase().includes('sort')) {
           const options = await dropdown.locator('option').all();
           for (const option of options) {
             const text = await option.textContent();
-            if (text && text.includes(sortOption)) {
+            if (text?.includes(sortOption)) {
               const value = await option.getAttribute('value');
               await dropdown.selectOption(value || '');
               found = true;
@@ -591,7 +585,7 @@ export class JobsPage extends BasePage {
 
     for (const item of items) {
       const text = await item.textContent();
-      if (text) {
+      if (text?.trim?.()) {
         titles.push(text.trim());
       }
     }
