@@ -24,7 +24,7 @@ export default defineConfig({
   /* Run with 1 worker by default for real website testing */
   workers: 1,
   /* Increase timeout for real website tests (increase for CI) */
-  timeout: process.env.CI ? 90000 : 60000,
+  timeout: process.env.CI ? 120000 : 60000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -36,7 +36,7 @@ export default defineConfig({
     trace: 'on-first-retry',
 
     /* Increase navigation timeout for real website (CI needs more time) */
-    navigationTimeout: process.env.CI ? 60000 : 30000,
+    navigationTimeout: process.env.CI ? 90000 : 30000,
   },
 
   /* Configure projects for major browsers */
