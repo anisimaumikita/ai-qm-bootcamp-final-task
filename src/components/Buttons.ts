@@ -1,16 +1,25 @@
-import type { Page } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 
 export class Button {
-  constructor(
-    private page: Page,
-    private selector: string
-  ) {}
+  constructor(private locator: Locator) {}
 
-  async click() {
-    await this.page.click(this.selector);
+  async click(): Promise<void> {
+    await this.locator.click();
   }
 
-  async getText(): Promise<string | null> {
-    return this.page.locator(this.selector).textContent();
+  async getText(): Promise<string> {
+    return (await this.locator.textContent()) || '';
+  }
+
+  async waitFor(options?: { timeout?: number }): Promise<void> {
+    await this.locator.waitFor(options);
+  }
+
+  async isVisible(options?: { timeout?: number }): Promise<boolean> {
+    return this.locator.isVisible(options);
+  }
+
+  getLocator(): Locator {
+    return this.locator;
   }
 }

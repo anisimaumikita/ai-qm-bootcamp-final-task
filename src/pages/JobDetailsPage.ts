@@ -7,11 +7,12 @@
 
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { Button } from '../components/Buttons';
 
 export class JobDetailsPage extends BasePage {
   // Locators
   private jobDetailTitle: Locator;
-  private saveJobButton: Locator;
+  private saveJobButtonComponent: Button;
   private jobDescription: Locator;
 
   constructor(page: Page) {
@@ -20,7 +21,7 @@ export class JobDetailsPage extends BasePage {
     // Use role-based selectors - discovered via codegen
     this.jobDetailTitle = page.getByRole('heading').first();
     // Use .first() to handle strict mode - there are 2 Save buttons on the page
-    this.saveJobButton = page.getByLabel('Save Job').first();
+    this.saveJobButtonComponent = new Button(page.getByLabel('Save Job').first());
     this.jobDescription = page.locator('section').first();
   }
 
@@ -46,8 +47,8 @@ export class JobDetailsPage extends BasePage {
    * Save the job by clicking Save button
    */
   async saveJob(): Promise<void> {
-    await this.saveJobButton.waitFor();
-    await this.saveJobButton.click();
+    await this.saveJobButtonComponent.waitFor();
+    await this.saveJobButtonComponent.click();
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -55,7 +56,7 @@ export class JobDetailsPage extends BasePage {
    * Check if Save button is visible
    */
   async isSaveButtonVisible(): Promise<boolean> {
-    return await this.saveJobButton.isVisible();
+    return await this.saveJobButtonComponent.isVisible();
   }
 
   /**
