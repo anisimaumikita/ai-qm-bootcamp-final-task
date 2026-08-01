@@ -9,7 +9,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "node -e \"process.env.CI || require('child_process').spawnSync('husky', ['install'], {stdio: 'inherit'})\""
   },
   "repository": {
     "type": "git",
