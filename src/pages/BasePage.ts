@@ -7,7 +7,7 @@ export class BasePage {
     this.page = page;
   }
 
-    get getPage(): Page {
+  get getPage(): Page {
     return this.page;
   }
 
@@ -18,7 +18,6 @@ export class BasePage {
   async getTitle(): Promise<string> {
     return await this.page.title();
   }
-  
 
   async waitForURL(url: string | RegExp): Promise<void> {
     await this.page.waitForURL(url);

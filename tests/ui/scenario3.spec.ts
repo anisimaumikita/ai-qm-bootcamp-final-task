@@ -36,17 +36,17 @@ test.describe('Scenario 3: Sort Job Listings', () => {
     // Step 8: Get available sort options
     const sortOptions = await jobsPage.getSortOptions();
     console.log(`Available sort options: ${sortOptions.join(', ')}`);
-    
+
     // Step 9: Test sorting with different options (if multiple options available)
     if (sortOptions.length > 1) {
       // Get a second sort option to test
       const secondSortOption = sortOptions[1];
-      
+
       console.log(`Testing sort option: ${secondSortOption}`);
       await jobsPage.selectSortOption(secondSortOption);
 
       // Wait for results to stabilize
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Step 10: Get updated job titles after sorting
       const sortedJobTitles = await jobsPage.getAllJobTitles();
@@ -80,14 +80,15 @@ test.describe('Scenario 3: Sort Job Listings', () => {
       const moveSuccess = await jobsPage.clickNextPage();
       if (moveSuccess) {
         console.log('Successfully navigated to next page');
-        
+
         // Verify we're on the next page with different results
         const nextPageJobTitles = await jobsPage.getAllJobTitles();
         console.log(`Next page job titles: ${nextPageJobTitles.slice(0, 3).join(', ')}`);
         expect(nextPageJobTitles.length).toBeGreaterThan(0);
-        
+
         // Results should be different from first page
-        const nextPageDifferent = JSON.stringify(initialJobTitles) !== JSON.stringify(nextPageJobTitles);
+        const nextPageDifferent =
+          JSON.stringify(initialJobTitles) !== JSON.stringify(nextPageJobTitles);
         console.log(`Next page results different: ${nextPageDifferent}`);
       } else {
         console.log('Could not navigate to next page (only 1 page or button disabled)');
@@ -95,7 +96,6 @@ test.describe('Scenario 3: Sort Job Listings', () => {
     }
   });
 });
-
 
 // My comments on the AI generated test:
 // A lot of console.log(); I have no idea how often this is used in real tests, but I guess it can be useful for debugging. I red that logger class is better than console.log() for real tests, but I guess this is fine for now.

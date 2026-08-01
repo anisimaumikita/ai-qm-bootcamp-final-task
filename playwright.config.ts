@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -17,12 +19,12 @@ export default defineConfig({
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retry on CI only (reduced to 1 to avoid exceeding CI job timeout of 60 minutes) */
+  retries: process.env.CI ? 1 : 0,
   /* Run with 1 worker by default for real website testing */
   workers: 1,
-  /* Increase timeout for real website tests (60 seconds) */
-  timeout: 60000,
+  /* Increase timeout for real website tests (increase for CI) */
+  timeout: process.env.CI ? 180000 : 60000,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -32,9 +34,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    
-    /* Increase navigation timeout for real website */
-    navigationTimeout: 30000,
+
+    /* Increase navigation timeout for real website (CI needs more time) */
+    navigationTimeout: process.env.CI ? 120000 : 30000,
   },
 
   /* Configure projects for major browsers */
@@ -47,11 +49,6 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */

@@ -11,8 +11,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
   },
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "playwright.config.ts", "eslint.config.js"],
   "exclude": ["node_modules"]
 }

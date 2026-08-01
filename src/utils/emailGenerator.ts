@@ -40,7 +40,6 @@ export const waitForCondition = async (
   const startTime = Date.now();
   let lastError: unknown;
 
-  // eslint-disable-next-line no-constant-condition
   while (Date.now() - startTime <= timeout) {
     try {
       const result = await condition();
