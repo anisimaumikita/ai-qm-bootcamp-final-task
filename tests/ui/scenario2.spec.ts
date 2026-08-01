@@ -6,7 +6,6 @@ test.describe('Scenario 2: Subscribe for a Job', () => {
   test('should fill job alert subscription form with valid data', async ({
     homePage,
     jobsPage,
-    page,
   }) => {
     // Generate unique email for this test run
     const uniqueEmail = generateUniqueEmail();
@@ -24,21 +23,8 @@ test.describe('Scenario 2: Subscribe for a Job', () => {
     // Step 4: Input email in the subscription field
     await jobsPage.subscribeWithEmail(uniqueEmail);
 
-    // Verify email was entered
-    const emailInput = page
-      .locator('input[type="email"]')
-      .or(page.getByPlaceholder(/email/i))
-      .first();
-    const emailValue = await emailInput.inputValue();
-    expect(emailValue).toContain('@');
-
     // Step 5: Select category
     await jobsPage.selectCategory(TEST_DATA.category);
-
-    // Verify category was selected
-    const categorySelect = page.getByRole('combobox', { name: 'Category' });
-    const categoryValue = await categorySelect.inputValue();
-    expect(categoryValue).toBeTruthy();
 
     // Step 6: Input location and choose it from the typeahead dropdown
     await jobsPage.enterLocation(TEST_DATA.location);

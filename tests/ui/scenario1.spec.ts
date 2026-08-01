@@ -17,7 +17,7 @@ test.describe('Scenario 1: Search for a Job', () => {
     await jobsPage.clickExploreJobsButton();
 
     // Step 4-5: Search for jobs with initial keyword
-    let searchKeyword: string = JOBS_SEARCH_PARAMS.DEFAULT_JOB_TITLE;
+    const searchKeyword = JOBS_SEARCH_PARAMS.DEFAULT_JOB_TITLE;
     await jobsPage.searchForJob(searchKeyword);
 
     // Step 6: Check if results exist, if not search for fallback
@@ -31,17 +31,12 @@ test.describe('Scenario 1: Search for a Job', () => {
 
       hasResults = await jobsPage.hasSearchResults();
       expect(hasResults).toBeTruthy();
-      searchKeyword = fallbackKeyword;
     }
-
-    // Get the first job title before clicking
-    const _firstJobTitle = await jobsPage.getFirstJobTitle();
 
     // Step 7: Click on the first job
     await jobsPage.clickFirstJob();
 
     // Step 8: Verify job title is not empty (search results may not exactly match keyword)
-    const _jobTitleContainsKeyword = await jobDetailsPage.jobTitleContains(searchKeyword);
     const jobTitle = await jobDetailsPage.getJobTitle();
     expect(jobTitle).toBeTruthy(); // Just verify we have a job title
 
