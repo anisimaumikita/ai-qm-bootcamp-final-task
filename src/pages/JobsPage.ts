@@ -97,7 +97,7 @@ export class JobsPage extends BasePage {
    * Navigate to jobs page
    */
   async navigate(): Promise<void> {
-    await this.goto(URLS.jobs);
+    await this.goto(URLS.jobsPage);
     // Handle cookie consent modal if it appears
     await this.dismissCookieConsent();
   }
