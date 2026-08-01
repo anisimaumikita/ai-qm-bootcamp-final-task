@@ -59,12 +59,17 @@ export class JobsPage extends BasePage {
     this.savedJobsTab = page.getByRole('button', { name: /saved\s+jobs/i });
 
     // Initialize subscription locators - discovered via Playwright Inspector page snapshot
-    this.emailInput = page.locator('input[type="email"]').or(page.getByPlaceholder(/email/i)).first();
+    this.emailInput = page
+      .locator('input[type="email"]')
+      .or(page.getByPlaceholder(/email/i))
+      .first();
     // Category select is a native <select> with accessible name "Category"
     this.categorySelect = page.getByRole('combobox', { name: 'Category' });
     // Location is a typeahead combobox with accessible name "Location Type to Search for a Location"
     // (distinct from the navigation search box which has a different accessible name)
-    this.locationInput = page.getByRole('combobox', { name: 'Location Type to Search for a Location' });
+    this.locationInput = page.getByRole('combobox', {
+      name: 'Location Type to Search for a Location',
+    });
     // "Add Job Alert" button (visible text "Add") adds the category+location pair to the alert list
     this.addJobAlertButton = page.getByRole('button', { name: 'Add Job Alert' });
     // Submit button has accessible name "Submit Job Alerts" (visible text "Sign Up")
@@ -74,8 +79,12 @@ export class JobsPage extends BasePage {
 
     // Initialize sorting locators
     this.sortDropdown = page.getByRole('combobox', { name: /sort|order/i }).first();
-    this.jobListItems = page.locator('a').filter({ hasText: /Manager|Designer|Developer|Accountant|Customer/ });
-    this.nextPageButton = page.getByRole('link', { name: 'Next' }).or(page.locator('[aria-label*="next" i]'));
+    this.jobListItems = page
+      .locator('a')
+      .filter({ hasText: /Manager|Designer|Developer|Accountant|Customer/ });
+    this.nextPageButton = page
+      .getByRole('link', { name: 'Next' })
+      .or(page.locator('[aria-label*="next" i]'));
     this.paginationInfo = page.locator('text=/page|of|results/i').first();
   }
 
@@ -83,7 +92,7 @@ export class JobsPage extends BasePage {
    * Navigate to jobs page
    */
   async navigate(): Promise<void> {
-    await this.goto(URLS.jobsPage);
+    await this.goto(URLS.jobs);
     // Handle cookie consent modal if it appears
     await this.dismissCookieConsent();
   }
@@ -110,7 +119,7 @@ export class JobsPage extends BasePage {
     try {
       // Try multiple strategies to close the system alert
       const alertContainer = this.page.locator('#system-ialert');
-      
+
       if (await alertContainer.isVisible({ timeout: 500 })) {
         // Strategy 1: Look for any close/dismiss button in the alert
         const closeButton = alertContainer.locator('button').first();
@@ -164,26 +173,26 @@ export class JobsPage extends BasePage {
     // Ensure search input is visible and ready
     await this.searchJobTitleInput.waitFor({ timeout: 10000 });
     await this.page.waitForTimeout(500); // Brief wait for form to settle
-    
+
     // Clear any existing text and enter new search term
     await this.searchJobTitleInput.clear();
     await this.searchJobTitleInput.fill(jobTitle);
-    
+
     // Wait for search button to be visible and stable
     await this.searchJobsButton.waitFor({ timeout: 10000 });
     await this.page.waitForTimeout(500);
-    
+
     // Dismiss blocking dialogs BEFORE trying to click
     await this.dismissSystemAlerts();
     await this.page.waitForTimeout(300);
-    
+
     // Ensure button is in viewport and clickable
     await this.searchJobsButton.scrollIntoViewIfNeeded();
     await this.page.waitForTimeout(300);
-    
+
     // Dismiss again in case new dialog appeared
     await this.dismissSystemAlerts();
-    
+
     // Click search button with retry logic
     let clickSuccess = false;
     let attempts = 0;
@@ -194,7 +203,7 @@ export class JobsPage extends BasePage {
       } catch (error) {
         attempts++;
         if (attempts >= 3) throw error;
-        
+
         // Dialog may have reappeared, dismiss it
         await this.dismissSystemAlerts();
         await this.page.waitForTimeout(500);
@@ -238,7 +247,7 @@ export class JobsPage extends BasePage {
     // Dismiss any alerts before clicking
     await this.dismissSystemAlerts();
     await this.page.waitForTimeout(200);
-    
+
     // Try to click with retry
     let clickSuccess = false;
     let attempts = 0;
@@ -253,7 +262,7 @@ export class JobsPage extends BasePage {
         await this.page.waitForTimeout(300);
       }
     }
-    
+
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -329,12 +338,12 @@ export class JobsPage extends BasePage {
    */
   async selectCategory(category: string): Promise<void> {
     await this.categorySelect.waitFor();
-    
+
     // Use selectOption with value matcher that looks for partial text match
     // The actual option is "Marketing & Communication" for "Marketing" category
     const options = await this.categorySelect.locator('option').all();
     let found = false;
-    
+
     for (const option of options) {
       const text = await option.textContent();
       if (text && text.includes(category)) {
@@ -344,7 +353,7 @@ export class JobsPage extends BasePage {
         break;
       }
     }
-    
+
     if (!found) {
       throw new Error(`Category "${category}" not found`);
     }
@@ -382,11 +391,11 @@ export class JobsPage extends BasePage {
    */
   async clickAddJobAlert(): Promise<void> {
     await this.addJobAlertButton.waitFor();
-    
+
     // Dismiss blocking dialogs before clicking
     await this.dismissSystemAlerts();
     await this.page.waitForTimeout(200);
-    
+
     // Click with retry logic
     let clickSuccess = false;
     let attempts = 0;
@@ -401,7 +410,7 @@ export class JobsPage extends BasePage {
         await this.page.waitForTimeout(300);
       }
     }
-    
+
     await this.page.waitForTimeout(300);
   }
 
@@ -410,11 +419,11 @@ export class JobsPage extends BasePage {
    */
   async clickSignUp(): Promise<void> {
     await this.signUpButton.waitFor();
-    
+
     // Dismiss blocking dialogs before clicking
     await this.dismissSystemAlerts();
     await this.page.waitForTimeout(200);
-    
+
     // Click with retry logic
     let clickSuccess = false;
     let attempts = 0;
@@ -429,7 +438,7 @@ export class JobsPage extends BasePage {
         await this.page.waitForTimeout(300);
       }
     }
-    
+
     await this.page.waitForLoadState('domcontentloaded');
   }
 
@@ -461,15 +470,16 @@ export class JobsPage extends BasePage {
     try {
       // First try to find any sort-related select/combobox
       const sortDropdowns = await this.page.locator('select, [role="combobox"]').all();
-      
+
       for (const dropdown of sortDropdowns) {
         const label = await dropdown.getAttribute('aria-label');
         const name = await dropdown.getAttribute('name');
-        
+
         // Check if this looks like a sort control
-        if ((label && label.toLowerCase().includes('sort')) || 
-            (name && name.toLowerCase().includes('sort'))) {
-          
+        if (
+          (label && label.toLowerCase().includes('sort')) ||
+          (name && name.toLowerCase().includes('sort'))
+        ) {
           // Get options if it's a select
           const options = await dropdown.locator('option').all();
           if (options.length > 0) {
@@ -484,12 +494,15 @@ export class JobsPage extends BasePage {
           }
         }
       }
-      
+
       // Alternative: look for sort buttons or links
-      const sortButtons = await this.page.locator('button, a').filter({ 
-        hasText: /sort|order|newest|relevance/i 
-      }).all();
-      
+      const sortButtons = await this.page
+        .locator('button, a')
+        .filter({
+          hasText: /sort|order|newest|relevance/i,
+        })
+        .all();
+
       const buttonLabels: string[] = [];
       for (const button of sortButtons.slice(0, 5)) {
         const text = await button.textContent();
@@ -497,7 +510,7 @@ export class JobsPage extends BasePage {
           buttonLabels.push(text.trim());
         }
       }
-      
+
       return buttonLabels;
     } catch (error) {
       console.log('Unable to find sort options:', error);
@@ -514,14 +527,15 @@ export class JobsPage extends BasePage {
       // Try to find sort select/combobox
       const sortDropdowns = await this.page.locator('select, [role="combobox"]').all();
       let found = false;
-      
+
       for (const dropdown of sortDropdowns) {
         const label = await dropdown.getAttribute('aria-label');
         const name = await dropdown.getAttribute('name');
-        
-        if ((label && label.toLowerCase().includes('sort')) || 
-            (name && name.toLowerCase().includes('sort'))) {
-          
+
+        if (
+          (label && label.toLowerCase().includes('sort')) ||
+          (name && name.toLowerCase().includes('sort'))
+        ) {
           const options = await dropdown.locator('option').all();
           for (const option of options) {
             const text = await option.textContent();
@@ -532,21 +546,24 @@ export class JobsPage extends BasePage {
               break;
             }
           }
-          
+
           if (found) break;
         }
       }
-      
+
       if (!found) {
         // Try to find and click a sort button
-        const sortButton = this.page.locator('button, a').filter({ 
-          hasText: new RegExp(sortOption, 'i') 
-        }).first();
-        
+        const sortButton = this.page
+          .locator('button, a')
+          .filter({
+            hasText: new RegExp(sortOption, 'i'),
+          })
+          .first();
+
         await sortButton.waitFor({ timeout: 3000 });
         await sortButton.click();
       }
-      
+
       // Wait for results to update
       await this.page.waitForLoadState('domcontentloaded');
       await this.page.waitForTimeout(500);
@@ -564,14 +581,14 @@ export class JobsPage extends BasePage {
     await this.jobListItems.first().waitFor({ timeout: 5000 });
     const items = await this.jobListItems.all();
     const titles: string[] = [];
-    
+
     for (const item of items) {
       const text = await item.textContent();
       if (text) {
         titles.push(text.trim());
       }
     }
-    
+
     return titles;
   }
 
@@ -582,10 +599,12 @@ export class JobsPage extends BasePage {
   async hasPagination(): Promise<boolean> {
     try {
       // Quick check for next button (short timeout to avoid hanging)
-      const nextButton = this.page.locator(
-        'a[rel="next"], button:has-text("Next"), a:has-text("Next"), [aria-label*="next" i]'
-      ).first();
-      
+      const nextButton = this.page
+        .locator(
+          'a[rel="next"], button:has-text("Next"), a:has-text("Next"), [aria-label*="next" i]'
+        )
+        .first();
+
       const isVisible = await nextButton.isVisible({ timeout: 1000 }).catch(() => false);
       return isVisible;
     } catch {
@@ -600,10 +619,10 @@ export class JobsPage extends BasePage {
   async getPaginationInfo(): Promise<string> {
     try {
       // Quick check for pagination text (short timeout)
-      const paginationElements = await this.page.locator(
-        'nav, [aria-label*="pagination" i], .pagination'
-      ).all();
-      
+      const paginationElements = await this.page
+        .locator('nav, [aria-label*="pagination" i], .pagination')
+        .all();
+
       if (paginationElements.length > 0) {
         const text = await paginationElements[0].textContent({ timeout: 1000 });
         if (text && /page|of|results|\d+/i.test(text)) {
@@ -612,7 +631,7 @@ export class JobsPage extends BasePage {
           }
         }
       }
-      
+
       return '';
     } catch {
       return '';
@@ -625,17 +644,19 @@ export class JobsPage extends BasePage {
    */
   async clickNextPage(): Promise<boolean> {
     try {
-      const nextButton = this.page.locator(
-        'a[rel="next"], button:has-text("Next"), a:has-text("Next"), [aria-label*="next" i]'
-      ).first();
-      
+      const nextButton = this.page
+        .locator(
+          'a[rel="next"], button:has-text("Next"), a:has-text("Next"), [aria-label*="next" i]'
+        )
+        .first();
+
       const isVisible = await nextButton.isVisible({ timeout: 1000 }).catch(() => false);
       const isDisabled = await nextButton.isDisabled().catch(() => true);
-      
+
       if (!isVisible || isDisabled) {
         return false;
       }
-      
+
       await nextButton.click({ timeout: 5000 });
       await this.page.waitForLoadState('domcontentloaded');
       await this.page.waitForTimeout(300);

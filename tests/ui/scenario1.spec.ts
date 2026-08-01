@@ -35,13 +35,13 @@ test.describe('Scenario 1: Search for a Job', () => {
     }
 
     // Get the first job title before clicking
-    const firstJobTitle = await jobsPage.getFirstJobTitle();
+    const _firstJobTitle = await jobsPage.getFirstJobTitle();
 
     // Step 7: Click on the first job
     await jobsPage.clickFirstJob();
 
     // Step 8: Verify job title is not empty (search results may not exactly match keyword)
-    const jobTitleContainsKeyword = await jobDetailsPage.jobTitleContains(searchKeyword);
+    const _jobTitleContainsKeyword = await jobDetailsPage.jobTitleContains(searchKeyword);
     const jobTitle = await jobDetailsPage.getJobTitle();
     expect(jobTitle).toBeTruthy(); // Just verify we have a job title
 
@@ -52,7 +52,7 @@ test.describe('Scenario 1: Search for a Job', () => {
     await jobsPage.goBack();
 
     // Step 9b: Wait for page to fully load and count to update
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Step 10: Verify saved jobs count equals 1
     const savedCount = await jobsPage.getSavedJobsCount();
@@ -67,7 +67,3 @@ test.describe('Scenario 1: Search for a Job', () => {
     expect(savedJobTitle.length).toBeGreaterThan(0);
   });
 });
-
-
-
-

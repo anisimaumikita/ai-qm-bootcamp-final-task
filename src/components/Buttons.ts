@@ -1,7 +1,10 @@
 import type { Page } from '@playwright/test';
 
 export class Button {
-  constructor(private page: Page, private selector: string) {}
+  constructor(
+    private page: Page,
+    private selector: string
+  ) {}
 
   async click() {
     await this.page.click(this.selector);

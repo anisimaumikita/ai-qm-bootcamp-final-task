@@ -78,12 +78,14 @@ All tests run against the **live website** across **3 browsers** (Chromium, Fire
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/anisimaumikita/ai-qm-bootcamp-final-task.git
    cd ai-qm-bootcamp-final-task
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -96,11 +98,13 @@ All tests run against the **live website** across **3 browsers** (Chromium, Fire
 ## ▶️ Running Tests
 
 ### Run all tests (all scenarios × 3 browsers)
+
 ```bash
 npx playwright test
 ```
 
 ### Run specific scenario
+
 ```bash
 # Scenario 1 only
 npx playwright test tests/ui/scenario1.spec.ts
@@ -113,6 +117,7 @@ npx playwright test tests/ui/scenario3.spec.ts
 ```
 
 ### Run on specific browser
+
 ```bash
 # Chromium only
 npx playwright test --project=chromium
@@ -125,16 +130,19 @@ npx playwright test --project=webkit
 ```
 
 ### Run in headed mode (see browser)
+
 ```bash
 npx playwright test --headed
 ```
 
 ### Run in debug mode
+
 ```bash
 npx playwright test --debug
 ```
 
 ### View HTML test report
+
 ```bash
 npx playwright show-report
 ```
@@ -142,9 +150,11 @@ npx playwright show-report
 ## 📊 Test Scenarios
 
 ### Scenario 1: Search and Save Jobs
+
 **File**: `tests/ui/scenario1.spec.ts`
 
 **Workflow**:
+
 1. Navigate to IKEA home page
 2. Click Jobs tab
 3. Click "Explore available jobs"
@@ -158,6 +168,7 @@ npx playwright show-report
 11. Verify saved job title exists
 
 **Assertions**:
+
 - Search returns results
 - Job title is populated
 - Saved job count is exactly 1
@@ -166,9 +177,11 @@ npx playwright show-report
 ---
 
 ### Scenario 2: Job Alert Form Validation
+
 **File**: `tests/ui/scenario2.spec.ts`
 
 **Workflow**:
+
 1. Navigate to IKEA home page
 2. Click Jobs tab
 3. Click "Explore available jobs"
@@ -178,6 +191,7 @@ npx playwright show-report
 7. Verify all fields are populated correctly
 
 **Assertions**:
+
 - Email field contains valid email format
 - Category dropdown has selected value
 - Location field has populated value
@@ -185,9 +199,11 @@ npx playwright show-report
 ---
 
 ### Scenario 3: Job Sorting and Pagination
+
 **File**: `tests/ui/scenario3.spec.ts`
 
 **Workflow**:
+
 1. Navigate to IKEA home page
 2. Click Jobs tab
 3. Click "Explore available jobs"
@@ -201,6 +217,7 @@ npx playwright show-report
 11. Verify different results on next page
 
 **Assertions**:
+
 - Search returns results
 - Job titles are captured
 - Sort options are detected
@@ -214,11 +231,13 @@ npx playwright show-report
 ### Page Object Model Pattern
 
 Each page is represented as a class with:
+
 - **Locators**: Private properties for element selectors
 - **Methods**: Public async methods for user interactions
 - **Waits**: Automatic wait strategies for stability
 
 **Example Usage**:
+
 ```typescript
 // Page object method
 await jobsPage.searchForJob('Manager');
@@ -245,7 +264,7 @@ test('my test', async ({ homePage, jobsPage, jobDetailsPage }) => {
   1. Click close button
   2. JavaScript force-hide
   3. Remove element entirely
-  
+
 - **Click Retry**: 3-attempt loops with 300-500ms waits
 - **Network Waits**: `domcontentloaded` strategy (IKEA has continuous background activity)
 
@@ -254,6 +273,7 @@ test('my test', async ({ homePage, jobsPage, jobDetailsPage }) => {
 **File**: `playwright.config.ts`
 
 ### Key Settings:
+
 ```typescript
 {
   testDir: './tests',
@@ -274,6 +294,7 @@ test('my test', async ({ homePage, jobsPage, jobDetailsPage }) => {
 ```
 
 ### Timeouts:
+
 - **Test timeout**: 60 seconds (max per test)
 - **Navigation timeout**: 30 seconds (for page navigation)
 - **Wait timeouts**: 1-5 seconds (for specific waits)
@@ -281,6 +302,7 @@ test('my test', async ({ homePage, jobsPage, jobDetailsPage }) => {
 ## 📈 Test Results
 
 ### Execution Summary:
+
 - **Total Tests**: 9 (3 scenarios × 3 browsers)
 - **Status**: ✅ All Passing
 - **Browsers**: Chromium, Firefox, WebKit
@@ -288,6 +310,7 @@ test('my test', async ({ homePage, jobsPage, jobDetailsPage }) => {
 - **Success Rate**: 100%
 
 ### Sample Output:
+
 ```
 Running 9 tests using 1 worker
 ✓ Scenario 1: Search for a Job
@@ -311,11 +334,13 @@ Running 9 tests using 1 worker
 ## 🛠️ Key Methods
 
 ### HomePage
+
 - `navigate()` - Navigate to IKEA home
 - `clickJobsTab()` - Click Jobs navigation
 - `isJobsTabVisible()` - Verify Jobs tab
 
 ### JobsPage
+
 - `searchForJob(title)` - Search by job title
 - `hasSearchResults()` - Check if results exist
 - `clickFirstJob()` - Click first result
@@ -330,6 +355,7 @@ Running 9 tests using 1 worker
 - `enterLocation(location)` - Enter job alert location
 
 ### JobDetailsPage
+
 - `getJobTitle()` - Get job posting title
 - `jobTitleContains(text)` - Verify title contains text
 - `saveJob()` - Save job to favorites
@@ -338,32 +364,42 @@ Running 9 tests using 1 worker
 ## 🐛 Troubleshooting
 
 ### Tests timing out
+
 **Solution**: Increase timeout in `playwright.config.ts` if website is slow:
+
 ```typescript
-timeout: 90000  // 90 seconds instead of 60
+timeout: 90000; // 90 seconds instead of 60
 ```
 
 ### Dialog blocking clicks
+
 **Solution**: Dialog dismissal is automatic, but you can debug:
+
 ```bash
 npx playwright test --debug  # Step through test
 npx playwright test --headed # See browser visually
 ```
 
 ### Element not found errors
+
 **Solution**: Update selectors in page objects based on website changes:
+
 1. Use Playwright Inspector: `npx playwright codegen`
 2. Record new selectors
 3. Update locators in page object
 
 ### Different results per run
+
 **Solution**: Website returns different job listings. Tests use:
+
 - Fallback keywords (Manager → Designer)
 - Flexible assertions (title exists vs exact match)
 - Pagination detection (not all locations have multiple pages)
 
 ### Network timeouts
+
 **Solution**: Website has continuous background activity. Config uses `domcontentloaded` instead of `networkidle`:
+
 - Faster and more reliable
 - Matches real user experience
 
@@ -390,12 +426,14 @@ jobs:
 ## 📝 Test Data
 
 ### Search Parameters (`src/constants/testData.ts`)
+
 ```typescript
-DEFAULT_JOB_TITLE: 'Manager'     // Primary search keyword
-FALLBACK_JOB_TITLE: 'Designer'   // Backup if no results
+DEFAULT_JOB_TITLE: 'Manager'; // Primary search keyword
+FALLBACK_JOB_TITLE: 'Designer'; // Backup if no results
 ```
 
 ### Form Data
+
 ```typescript
 category: 'Marketing & Communication'
 location: 'Stockholm'
