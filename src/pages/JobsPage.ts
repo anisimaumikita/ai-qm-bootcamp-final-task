@@ -4,35 +4,41 @@
  * Represents the IKEA jobs/careers page.
  * Handles job search, filtering, and navigation.
  *
- * NOTE: The actual selectors will need adjustment based on
- * real website structure. These are role-based and data-testid
- * based selectors which are more maintainable and stable.
+ * Uses component-based architecture for better maintainability
+ * and encapsulation of element interactions.
  */
 
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { TextInput } from '../components/TextInput';
+import { Dropdown } from '../components/Dropdowns';
+import { Button } from '../components/Buttons';
 import { URLS } from '../constants/urls';
 
 export class JobsPage extends BasePage {
-  // Locators for job exploration
-  private exploreJobsButton: Locator;
-  private searchJobTitleInput: Locator;
-  private searchJobsButton: Locator;
+  // Job exploration components
+  private exploreJobsButton: Button;
+  private searchJobTitleInput: TextInput;
+  private searchJobsButton: Button;
+
+  // Job display locators (complex interactions, keep as locators)
   private firstJobItem: Locator;
   private jobTitle: Locator;
-  private saveJobButton: Locator;
-  private savedJobsBadge: Locator;
-  private savedJobsTab: Locator;
 
-  // Locators for subscription
-  private emailInput: Locator;
-  private categorySelect: Locator;
-  private locationInput: Locator;
-  private addJobAlertButton: Locator;
-  private signUpButton: Locator;
+  // Job save components
+  private saveJobButton: Button;
+  private savedJobsBadge: Locator;
+  private savedJobsTab: Button;
+
+  // Subscription components
+  private emailInput: TextInput;
+  private categorySelect: Dropdown;
+  private locationInput: TextInput;
+  private addJobAlertButton: Button;
+  private signUpButton: Button;
   private confirmationMessage: Locator;
 
-  // Locators for sorting
+  // Sorting and pagination locators (complex interactions)
   private sortDropdown: Locator;
   private jobListItems: Locator;
   private nextPageButton: Locator;
@@ -41,43 +47,42 @@ export class JobsPage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    // Initialize job search locators - Selectors discovered via Playwright codegen
-    this.exploreJobsButton = page.getByRole('link', { name: 'Explore available jobs' });
-    this.searchJobTitleInput = page.getByRole('searchbox', { name: 'Keyword Search' });
-    // Search button selector: use data-last-action with button--blue class
-    // This specifically targets the form submit button (not the black navigation button)
-    this.searchJobsButton = page.locator('button[data-last-action="search-submit"].button--blue');
-    // First job link in search results - filter job links by having job titles
+    // Initialize job search components with role-based locators
+    this.exploreJobsButton = new Button(page.getByRole('link', { name: 'Explore available jobs' }));
+    this.searchJobTitleInput = new TextInput(
+      page.getByRole('searchbox', { name: 'Keyword Search' })
+    );
+    this.searchJobsButton = new Button(
+      page.locator('button[data-last-action="search-submit"].button--blue')
+    );
+
+    // Initialize job result locators
     this.firstJobItem = page
       .locator('a')
       .filter({ hasText: /Manager|Designer|Developer|Accountant|Customer/ })
       .first();
     this.jobTitle = page.getByRole('heading').first();
-    this.saveJobButton = page.getByLabel('Save Job');
-    // Saved jobs counter button shows as "Saved jobs (0)" or "Saved jobs (1)" etc.
-    this.savedJobsBadge = page.getByRole('button', { name: /saved\s+jobs\s*\(\d+\)/i });
-    this.savedJobsTab = page.getByRole('button', { name: /saved\s+jobs/i });
 
-    // Initialize subscription locators - discovered via Playwright Inspector page snapshot
-    this.emailInput = page
-      .locator('input[type="email"]')
-      .or(page.getByPlaceholder(/email/i))
-      .first();
-    // Category select is a native <select> with accessible name "Category"
-    this.categorySelect = page.getByRole('combobox', { name: 'Category' });
-    // Location is a typeahead combobox with accessible name "Location Type to Search for a Location"
-    // (distinct from the navigation search box which has a different accessible name)
-    this.locationInput = page.getByRole('combobox', {
-      name: 'Location Type to Search for a Location',
-    });
-    // "Add Job Alert" button (visible text "Add") adds the category+location pair to the alert list
-    this.addJobAlertButton = page.getByRole('button', { name: 'Add Job Alert' });
-    // Submit button has accessible name "Submit Job Alerts" (visible text "Sign Up")
-    this.signUpButton = page.getByRole('button', { name: 'Submit Job Alerts' });
-    // Confirmation is a plain paragraph with this exact success text (not an ARIA live region)
+    // Initialize job save components
+    this.saveJobButton = new Button(page.getByLabel('Save Job'));
+    this.savedJobsBadge = page.getByRole('button', { name: /saved\s+jobs\s*\(\d+\)/i });
+    this.savedJobsTab = new Button(page.getByRole('button', { name: /saved\s+jobs/i }));
+
+    // Initialize subscription components with role-based locators
+    this.emailInput = new TextInput(
+      page.locator('input[type="email"]').or(page.getByPlaceholder(/email/i)).first()
+    );
+    this.categorySelect = new Dropdown(page.getByRole('combobox', { name: 'Category' }));
+    this.locationInput = new TextInput(
+      page.getByRole('combobox', {
+        name: 'Location Type to Search for a Location',
+      })
+    );
+    this.addJobAlertButton = new Button(page.getByRole('button', { name: 'Add Job Alert' }));
+    this.signUpButton = new Button(page.getByRole('button', { name: 'Submit Job Alerts' }));
     this.confirmationMessage = page.getByText('Your subscription was submitted successfully');
 
-    // Initialize sorting locators
+    // Initialize sorting and pagination locators
     this.sortDropdown = page.getByRole('combobox', { name: /sort|order/i }).first();
     this.jobListItems = page
       .locator('a')
@@ -92,7 +97,7 @@ export class JobsPage extends BasePage {
    * Navigate to jobs page
    */
   async navigate(): Promise<void> {
-    await this.goto(URLS.jobs);
+    await this.goto(URLS.jobsPage);
     // Handle cookie consent modal if it appears
     await this.dismissCookieConsent();
   }
@@ -187,7 +192,7 @@ export class JobsPage extends BasePage {
     await this.page.waitForTimeout(300);
 
     // Ensure button is in viewport and clickable
-    await this.searchJobsButton.scrollIntoViewIfNeeded();
+    await this.searchJobsButton.getLocator().scrollIntoViewIfNeeded();
     await this.page.waitForTimeout(300);
 
     // Dismiss again in case new dialog appeared
@@ -198,7 +203,7 @@ export class JobsPage extends BasePage {
     let attempts = 0;
     while (!clickSuccess && attempts < 3) {
       try {
-        await this.searchJobsButton.click({ force: false, timeout: 5000 });
+        await this.searchJobsButton.click();
         clickSuccess = true;
       } catch (error) {
         attempts++;
@@ -272,7 +277,7 @@ export class JobsPage extends BasePage {
   async getFirstJobTitle(): Promise<string> {
     await this.jobTitle.waitFor();
     const text = await this.jobTitle.textContent();
-    return text || '';
+    return text ?? '';
   }
 
   /**
@@ -315,7 +320,15 @@ export class JobsPage extends BasePage {
   async getSavedJobTitle(): Promise<string> {
     await this.jobTitle.waitFor();
     const text = await this.jobTitle.textContent();
-    return text || '';
+    return text ?? '';
+  }
+
+  /**
+   * Navigate back to previous page
+   */
+  async goBack(): Promise<void> {
+    await this.page.goBack();
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   /**
@@ -327,11 +340,6 @@ export class JobsPage extends BasePage {
     await this.emailInput.fill(email);
   }
 
-  async goBack(): Promise<void> {
-    await this.page.goBack();
-    await this.page.waitForLoadState('domcontentloaded');
-  }
-
   /**
    * Select a category for job alerts
    * @param category Category name to select
@@ -341,14 +349,14 @@ export class JobsPage extends BasePage {
 
     // Use selectOption with value matcher that looks for partial text match
     // The actual option is "Marketing & Communication" for "Marketing" category
-    const options = await this.categorySelect.locator('option').all();
+    const options = await this.categorySelect.getLocator().locator('option').all();
     let found = false;
 
     for (const option of options) {
       const text = await option.textContent();
-      if (text && text.includes(category)) {
+      if (text?.includes(category)) {
         const value = await option.getAttribute('value');
-        await this.categorySelect.selectOption(value || '');
+        await this.categorySelect.selectByValue(value ?? '');
         found = true;
         break;
       }
@@ -371,8 +379,7 @@ export class JobsPage extends BasePage {
     await this.page.waitForTimeout(1000);
 
     // Scope the suggestion search to the listbox owned by this combobox (via aria-controls)
-    // to avoid matching unrelated hidden <option> elements elsewhere on the page (e.g. Category select)
-    const listboxId = await this.locationInput.getAttribute('aria-controls');
+    const listboxId = await this.locationInput.getLocator().getAttribute('aria-controls');
     if (listboxId) {
       const listbox = this.page.locator(`#${listboxId}`);
       const firstOption = listbox.getByRole('option').first();
@@ -401,7 +408,7 @@ export class JobsPage extends BasePage {
     let attempts = 0;
     while (!clickSuccess && attempts < 3) {
       try {
-        await this.addJobAlertButton.click({ timeout: 5000 });
+        await this.addJobAlertButton.click();
         clickSuccess = true;
       } catch (error) {
         attempts++;
@@ -429,7 +436,7 @@ export class JobsPage extends BasePage {
     let attempts = 0;
     while (!clickSuccess && attempts < 3) {
       try {
-        await this.signUpButton.click({ timeout: 5000 });
+        await this.signUpButton.click();
         clickSuccess = true;
       } catch (error) {
         attempts++;
@@ -459,7 +466,7 @@ export class JobsPage extends BasePage {
    */
   async getConfirmationMessage(): Promise<string> {
     const text = await this.confirmationMessage.textContent();
-    return text || '';
+    return text ?? '';
   }
 
   /**
@@ -476,17 +483,14 @@ export class JobsPage extends BasePage {
         const name = await dropdown.getAttribute('name');
 
         // Check if this looks like a sort control
-        if (
-          (label && label.toLowerCase().includes('sort')) ||
-          (name && name.toLowerCase().includes('sort'))
-        ) {
+        if (label?.toLowerCase().includes('sort') || name?.toLowerCase().includes('sort')) {
           // Get options if it's a select
           const options = await dropdown.locator('option').all();
           if (options.length > 0) {
             const sortOptions: string[] = [];
             for (const option of options) {
               const text = await option.textContent();
-              if (text && text.trim()) {
+              if (text?.trim()) {
                 sortOptions.push(text.trim());
               }
             }
@@ -506,14 +510,14 @@ export class JobsPage extends BasePage {
       const buttonLabels: string[] = [];
       for (const button of sortButtons.slice(0, 5)) {
         const text = await button.textContent();
-        if (text && text.trim()) {
+        if (text?.trim()) {
           buttonLabels.push(text.trim());
         }
       }
 
       return buttonLabels;
     } catch (error) {
-      console.log('Unable to find sort options:', error);
+      console.warn('Unable to find sort options:', error);
       return [];
     }
   }
@@ -532,16 +536,13 @@ export class JobsPage extends BasePage {
         const label = await dropdown.getAttribute('aria-label');
         const name = await dropdown.getAttribute('name');
 
-        if (
-          (label && label.toLowerCase().includes('sort')) ||
-          (name && name.toLowerCase().includes('sort'))
-        ) {
+        if (label?.toLowerCase().includes('sort') || name?.toLowerCase().includes('sort')) {
           const options = await dropdown.locator('option').all();
           for (const option of options) {
             const text = await option.textContent();
-            if (text && text.includes(sortOption)) {
+            if (text?.includes(sortOption)) {
               const value = await option.getAttribute('value');
-              await dropdown.selectOption(value || '');
+              await dropdown.selectOption(value ?? '');
               found = true;
               break;
             }
@@ -584,7 +585,7 @@ export class JobsPage extends BasePage {
 
     for (const item of items) {
       const text = await item.textContent();
-      if (text) {
+      if (text?.trim?.()) {
         titles.push(text.trim());
       }
     }
